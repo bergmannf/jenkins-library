@@ -39,16 +39,20 @@ def call(Map params = [:]) {
     int masterCount = environment.get('MASTER_COUNT', "3").toInteger()
     int workerCount = environment.get('WORKER_COUNT', "2").toInteger()
 
+    Map parameters = [nodeLabel: 'leap15.0&&caasp-pr-worker',
+                      environmentType: 'caasp-kvm',
+                      environmentTypeOptions: environmentTypeOptions,
+                      environmentDestroy: environmentDestroy,
+                      gitBase: 'https://github.com/kubic-project',
+                      gitBranch: env.getEnvironment().get('CHANGE_TARGET', env.BRANCH_NAME),
+                      gitCredentialsId: 'github-token',
+                      masterCount: masterCount,
+                      workerCount: workerCount]
+
     withKubicEnvironment(
-            nodeLabel: 'leap15.0&&caasp-pr-worker',
-            environmentType: 'caasp-kvm',
-            environmentTypeOptions: environmentTypeOptions,
-            environmentDestroy: environmentDestroy,
-            gitBase: 'https://github.com/kubic-project',
-            gitBranch: env.getEnvironment().get('CHANGE_TARGET', env.BRANCH_NAME),
-            gitCredentialsId: 'github-token',
-            masterCount: masterCount,
-            workerCount: workerCount) {
+            parameters,
+            preBootstrapBody = {}
+    ) {
 
         // Run the Core Project Tests
         coreKubicProjectTests(
